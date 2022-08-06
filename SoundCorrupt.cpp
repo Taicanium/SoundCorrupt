@@ -14,7 +14,7 @@ int main()
     GaussianNoise gn;
     std::vector<double> longBuffer;
 
-    printf("Enter a file path below:");
+    printf("Enter a file path below:\n");
     std::string sIn;
     std::cin >> sIn;
 
@@ -24,14 +24,14 @@ int main()
     int channel = 0;
     int numSamples = audioFile.getNumSamplesPerChannel();
     int samplesPerSecond = audioFile.getNumSamplesPerChannel() / audioFile.getLengthInSeconds();
-    printf("Samples: %d\nSamples per second: %d\nFile length: %f\n", numSamples, samplesPerSecond, audioFile.getLengthInSeconds());
+    printf("\nSamples: %d\nSamples per second: %d\nFile length: %f\n\n", numSamples, samplesPerSecond, audioFile.getLengthInSeconds());
 
     double szShortBuffer = samplesPerSecond / (24 + fmod(gn.noise(), 0.5));
     double szMediumBuffer = samplesPerSecond / (6 + fmod(gn.noise(), 0.5));
     double szLongBuffer = samplesPerSecond / (0.75 + fmod(gn.noise(), 0.5));
     longBuffer = std::vector<double>(szLongBuffer);
 
-    printf("Populating buffer...\n");
+    printf("Populating buffer...\n\n");
 
     for (int i = 0; i < szLongBuffer; i++)
     {
@@ -173,9 +173,9 @@ int main()
         }
     }
 
-    printf("Mixing down to mono...\n");
+    printf("\nMixing down to mono...\n");
 
-    std::vector<double> newSamples = std::vector<double>();
+    std::vector<double> newSamples = std::vector<double>(numSamples);
     for (int i = 0; i < numSamples; i++)
     {
         newSamples[i] = audioFile.samples[channel][i];
