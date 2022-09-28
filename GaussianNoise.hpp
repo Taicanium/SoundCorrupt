@@ -1,6 +1,8 @@
 #ifndef _GAUSSIANNOISE_HPP_
 #define _GAUSSIANNOISE_HPP_
 
+#include <random>
+
 class GaussianNoise
 {
 public:

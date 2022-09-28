@@ -1,10 +1,3 @@
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <map>
-#include <random>
-#include <cmath>
-
 #include "AudioFile.h"
 #include "GaussianNoise.hpp"
 
@@ -14,7 +7,7 @@ int main()
     GaussianNoise gn;
     std::vector<double> longBuffer;
 
-    printf("Enter a file path below:\n");
+    printf("Enter a WAV file path below:\n");
     std::string sIn;
     std::cin >> sIn;
 
@@ -37,8 +30,8 @@ int main()
     {
         double sample = audioFile.samples[channel][i];
         longBuffer.emplace(longBuffer.begin(), sample);
-        longBuffer.resize(szLongBuffer);
     }
+    longBuffer.resize(szLongBuffer);
 
     int samplesCompleted = szLongBuffer;
     int prevAction1 = -1;
@@ -97,8 +90,8 @@ int main()
             {
                 sample = audioFile.samples[channel][i % numSamples];
                 longBuffer.emplace(longBuffer.begin(), sample);
-                longBuffer.resize(szLongBuffer);
             }
+            longBuffer.resize(szLongBuffer);
         case 4: // Standard playthrough.
             printf("Standard playthrough\n");
             beginningSample = samplesCompleted;
