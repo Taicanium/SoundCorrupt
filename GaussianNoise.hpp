@@ -1,6 +1,7 @@
 #ifndef _GAUSSIANNOISE_HPP_
 #define _GAUSSIANNOISE_HPP_
 
+#include "pch.h"
 #include <random>
 
 class GaussianNoise

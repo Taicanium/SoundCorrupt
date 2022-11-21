@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "AudioFile.h"
 #include "GaussianNoise.hpp"
 
@@ -42,20 +44,20 @@ int main()
         longBuffer.emplace(longBuffer.begin(), audioFile.samples[channel][samplesCompleted]);
         longBuffer.resize(szLongBuffer);
         samplesCompleted++;
-        int nextAction = floor(fmod(gn.noise() * 100.0, 8.0));
-        while (nextAction == prevAction1 && nextAction == prevAction2)
+        int nextAction = floor(fmod(gn.noise() * 100.0, 12.0));
+        while (nextAction == prevAction1)
         {
-            nextAction = floor(fmod(gn.noise() * 100.0, 8.0));
+            nextAction = floor(fmod(gn.noise() * 100.0, 12.0));
         }
         prevAction2 = prevAction1;
         prevAction1 = nextAction;
-        int i, repetition, beginningSample, silenceSample, silenceLength, silencePlaying;
+        int i, repetition, beginningSample, silenceSample, bufferLength, silencePlaying;
         double sample, silenceNoise;
         switch (nextAction)
         {
         case 0: // Short stutter
             printf("Short stutter\n");
-            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 24.0 / RAND_MAX));
+            repetition = floor(fmod(gn.noise() * 0.5, (rand() + 1) * 8.0 / RAND_MAX));
             beginningSample = samplesCompleted;
             for (i = beginningSample; i < beginningSample + szShortBuffer * repetition; i++)
             {
@@ -65,7 +67,7 @@ int main()
             break;
         case 1: // Medium stutter
             printf("Medium stutter\n");
-            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 12.0 / RAND_MAX));
+            repetition = floor(fmod(gn.noise() * 2.0, (rand() + 1) * 8.0 / RAND_MAX));
             beginningSample = samplesCompleted;
             for (i = beginningSample; i < beginningSample + szMediumBuffer * repetition; i++)
             {
@@ -75,7 +77,7 @@ int main()
             break;
         case 2: // Long stutter
             printf("Long stutter\n");
-            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 6.0 / RAND_MAX));
+            repetition = floor(fmod(gn.noise() * 8.0, (rand() + 1) * 8.0 / RAND_MAX));
             beginningSample = samplesCompleted;
             for (i = beginningSample; i < beginningSample + szLongBuffer * repetition; i++)
             {
@@ -92,7 +94,8 @@ int main()
                 longBuffer.emplace(longBuffer.begin(), sample);
             }
             longBuffer.resize(szLongBuffer);
-        case 4: // Standard playthrough.
+            break;
+        /*case 4: // Standard playthrough.
             printf("Standard playthrough\n");
             beginningSample = samplesCompleted;
             repetition = (((double)rand() / (double)RAND_MAX) * 0.5) + 0.25;
@@ -101,15 +104,15 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = longBuffer[szLongBuffer - 1 - i % (int)(szLongBuffer)];
                 samplesCompleted++;
             }
-            break;
+            break;*/
         case 5: // Interspersed static.
             printf("Interspersed static\n");
-            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 4.0 / RAND_MAX));
+            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 2.0 / RAND_MAX));
             beginningSample = samplesCompleted;
             silenceSample = beginningSample;
-            silenceLength = gn.noise() * szLongBuffer * 0.75;
+            bufferLength = gn.noise() * szLongBuffer * 0.75;
             silencePlaying = 0;
-            for (i = beginningSample; i < beginningSample + silenceLength * repetition; i++)
+            for (i = beginningSample; i < beginningSample + bufferLength * repetition; i++)
             {
                 silenceNoise = gn.noise();
                 silencePlaying = fabs(silenceNoise) >= 1.0 ? ~silencePlaying : silencePlaying;
@@ -127,9 +130,9 @@ int main()
             repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 6.0 / RAND_MAX));
             beginningSample = samplesCompleted;
             silenceSample = beginningSample;
-            silenceLength = gn.noise() * szLongBuffer;
+            bufferLength = gn.noise() * szLongBuffer;
             silencePlaying = 0;
-            for (i = beginningSample; i < beginningSample + silenceLength * repetition; i++)
+            for (i = beginningSample; i < beginningSample + bufferLength * repetition; i++)
             {
                 silenceNoise = gn.noise() / 5.3;
                 silencePlaying = fabs(silenceNoise) >= 1.0 ? ~silencePlaying : silencePlaying;
@@ -146,19 +149,44 @@ int main()
             printf("Interspersed silence\n");
             repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 4.0 / RAND_MAX));
             beginningSample = samplesCompleted;
-            silenceSample = beginningSample;
-            silenceLength = gn.noise() * szLongBuffer * 0.75;
+            bufferLength = gn.noise() * szLongBuffer * 0.75;
             silencePlaying = 0;
-            for (i = beginningSample; i < beginningSample + silenceLength * repetition; i++)
+            for (i = beginningSample; i < beginningSample + bufferLength * repetition; i++)
             {
                 silenceNoise = gn.noise() / 5.0;
                 silencePlaying = fabs(silenceNoise) >= 1.0 ? ~silencePlaying : silencePlaying;
-                silenceSample++;
                 if (silencePlaying == 0)
                 {
-                    audioFile.samples[channel][(beginningSample + silenceSample) % numSamples] = 0.0;
+                    audioFile.samples[channel][i % numSamples] = 0.0;
                 }
                 samplesCompleted++;
+            }
+            break;
+        case 8: // Amplitude clipping.
+            printf("Amplitude clipping\n");
+            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 4.0 / RAND_MAX));
+            beginningSample = samplesCompleted;
+            silenceSample = beginningSample;
+            bufferLength = gn.noise() * szLongBuffer * 0.75;
+            for (i = beginningSample; i < beginningSample + bufferLength * repetition; i++)
+            {
+                if (audioFile.samples[channel][i % numSamples] < 0.0)
+                {
+                    audioFile.samples[channel][i % numSamples] = 0.0;
+                }
+                samplesCompleted++;
+            }
+            break;
+        case 9: // Sample doubling.
+            printf("Sample doubling\n");
+            repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 4.0 / RAND_MAX));
+            beginningSample = samplesCompleted;
+            silenceSample = beginningSample;
+            bufferLength = gn.noise() * szLongBuffer * 0.75;
+            for (i = beginningSample; i < beginningSample + bufferLength * repetition; i += 2)
+            {
+                audioFile.samples[channel][(i + 1) % numSamples] = audioFile.samples[channel][i % numSamples];
+                samplesCompleted += 2;
             }
             break;
         default: // Do nothing.
