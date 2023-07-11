@@ -1,17 +1,15 @@
-#include "pch.h"
-
 #include "AudioFile.h"
 #include "GaussianNoise.hpp"
 
 int main()
 {
-    AudioFile<double> audioFile;
-    GaussianNoise gn;
-    std::vector<double> longBuffer;
-
     printf("Enter a WAV file path below:\n");
     std::string sIn;
     std::cin >> sIn;
+
+    AudioFile<double> audioFile;
+    GaussianNoise gn;
+    std::vector<double> longBuffer;
 
     audioFile.load(sIn);
     gn.init();
@@ -49,8 +47,6 @@ int main()
         {
             nextAction = floor(fmod(gn.noise() * 100.0, 12.0));
         }
-        prevAction2 = prevAction1;
-        prevAction1 = nextAction;
         int i, repetition, beginningSample, silenceSample, bufferLength, silencePlaying;
         double sample, silenceNoise;
         switch (nextAction)
@@ -64,6 +60,8 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = longBuffer[szShortBuffer - 1 - i % (int)(szShortBuffer)];
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 1: // Medium stutter
             printf("Medium stutter\n");
@@ -74,6 +72,8 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = longBuffer[szMediumBuffer - 1 - i % (int)(szMediumBuffer)];
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 2: // Long stutter
             printf("Long stutter\n");
@@ -84,6 +84,8 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = longBuffer[szLongBuffer - 1 - i % (int)(szLongBuffer)];
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 3: // Refresh buffer.
             printf("Refresh buffer\n");
@@ -94,8 +96,10 @@ int main()
                 longBuffer.emplace(longBuffer.begin(), sample);
             }
             longBuffer.resize(szLongBuffer);
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
-        /*case 4: // Standard playthrough.
+        case 4: // Standard playthrough.
             printf("Standard playthrough\n");
             beginningSample = samplesCompleted;
             repetition = (((double)rand() / (double)RAND_MAX) * 0.5) + 0.25;
@@ -104,7 +108,9 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = longBuffer[szLongBuffer - 1 - i % (int)(szLongBuffer)];
                 samplesCompleted++;
             }
-            break;*/
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
+            break;
         case 5: // Interspersed static.
             printf("Interspersed static\n");
             repetition = floor(fmod(gn.noise() * 100.0, (rand() + 1) * 2.0 / RAND_MAX));
@@ -124,6 +130,8 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = silencePlaying ? longBuffer[szLongBuffer - 1 - silenceSample % (int)(szLongBuffer)] : 0.0;
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 6: // Gaussian stutter.
             printf("Gaussian stutter\n");
@@ -144,6 +152,8 @@ int main()
                 audioFile.samples[channel][samplesCompleted % numSamples] = silencePlaying ? longBuffer[szLongBuffer - 1 - silenceSample % (int)(szLongBuffer)] : 0.0;
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 7: // Interspersed silence.
             printf("Interspersed silence\n");
@@ -161,6 +171,8 @@ int main()
                 }
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 8: // Amplitude clipping.
             printf("Amplitude clipping\n");
@@ -176,6 +188,8 @@ int main()
                 }
                 samplesCompleted++;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         case 9: // Sample doubling.
             printf("Sample doubling\n");
@@ -188,6 +202,8 @@ int main()
                 audioFile.samples[channel][(i + 1) % numSamples] = audioFile.samples[channel][i % numSamples];
                 samplesCompleted += 2;
             }
+            prevAction2 = prevAction1;
+            prevAction1 = nextAction;
             break;
         default: // Do nothing.
             break;
