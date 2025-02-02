@@ -200,7 +200,7 @@ int main()
             bufferLength = gn.noise() * szLongBuffer * 0.75;
             for (i = beginningSample; i < beginningSample + bufferLength * repetition; i += 2)
             {
-                audioFile.samples[channel][(i + 1) % numSamples] = audioFile.samples[channel][i % numSamples];
+                audioFile.samples[channel][(static_cast<std::vector<double, std::allocator<double>>::size_type>(i) + 1) % numSamples] = audioFile.samples[channel][i % numSamples];
                 samplesCompleted += 2;
             }
             prevAction2 = prevAction1;

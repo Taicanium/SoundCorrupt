@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+/.vs
+/SoundCorrupt/x64
+/x64
+*.vcxproj.*
+*.sln
